@@ -7,7 +7,7 @@ import { heightSelector, uriSelector, widthSelector } from '../../recoil/selecto
 import { useRecoilValue } from 'recoil';
 
 const Image2VideoScreen = () => {
-  const video = require('../../assets/video/output2.mp4');
+  const video = require('../../assets/video/output3.mp4');
   const [onPress, setOnPress] = useState(false);
 
   const uri = useRecoilValue(uriSelector);

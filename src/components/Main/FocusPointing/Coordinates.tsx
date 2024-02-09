@@ -28,46 +28,32 @@ const Coordinates = () => {
     offset: { x: 0, y: 0 },
     size: { width: 0, height: 0 },
     displaySize: { width: 0, height: 0 },
+    quality: 1,
   });
 
   const [focusBox, setFocusBox] = useState(false);
 
   // TODO 서버에서 받아옴 
   const dict = {
-    "나무": {
+    "열기구": {
         "coord": [
-            [
-                134,
-                96,
-                391,
-                566
-            ]
+          [95, 43, 162, 112], [184, 35, 243, 110], [592, 5, 635, 65]
         ], 
-        "context" : "스타일은 약간 단순화되어 있으며, 넓은 색상 영역이 하늘, 초목, 나무의 수직 형태를 구분합니다. 그림은 눈길을 위로 끌어올리는 높고 가느다란 포플러 나무들이 지배하는 풍경을 그립니다. 나무들 아래에는 거의 성숙하기 직전의 농작물을 암시할 수 있는 초록색 필드가 보입니다. 나무들 사이에는 작은 집이나 건물이 있어, 아니면 자연적인 장면에 인간 요소를 추가합니다. 작가는 나무의 수직선과 하늘과 필드의 수평선 사이의 대조를 이용합니다."
+        "context" : "열기구를 포함한 것은 고요하거나 환상적인 느낌을 더해주어, 아름다운 평화로운 환경을 시사합니다. 이 그림에서 두드러진 특징은 열기구, 계단식 밭들, 그리고 굽이치는 강입니다."
     },
-    "하늘": {
+    "계단식 밭": {
         "coord": [
-            [
-                0,
-                0,
-                517,
-                96
-            ],
+          [0, 309, 800, 446]
         ],
-        "context": "스타일은 약간 단순화되어 있으며, 넓은 색상 영역이 하늘, 초목, 나무의 수직 형태를 구분합니다. 배경은 미묘한 구름 디테일이 있는 연하늘로, 평온한 대기 조건을 암시합니다. 작가는 나무의 수직선과 하늘과 필드의 수평선 사이의 대조를 이용합니다."
+        "context": "계단식 밭들과 같은 요소들은 인간의 경작을 시사하며, 아마도 벼밭이나 비슷한 농업용 계단식 경사지일 것입니다. 이 그림에서 두드러진 특징은 열기구, 계단식 밭들, 그리고 굽이치는 강입니다."
     },
-    "필드": {
+    "굽이굽이 흐르는 강": {
         "coord": [
-            [
-                3,
-                566,
-                514,
-                673
-            ],
+          [172, 240, 576, 322]
         ],
-        "context": "나무들 아래에는 거의 성숙하기 직전의 농작물을 암시할 수 있는 초록색 필드가 보입니다. 작가는 나무의 수직선과 하늘과 필드의 수평선 사이의 대조를 이용합니다."
+        "context": "이 그림에서 두드러진 특징은 열기구, 계단식 밭들, 그리고 굽이치는 강입니다."
     }
-}
+  }
 
   const handleImageLayout = (event: LayoutChangeEvent) => {
     const { x, y, width, height } = event.nativeEvent.layout;
@@ -76,10 +62,10 @@ const Coordinates = () => {
 
   const calculateCoordinates = (list: number[][]) => {
     const [x1, y1, x2, y2] = list[0];
-    const x1_ = imageSize.width / originalWidth  * x1 + imageSize.x;
-    const y1_ = imageSize.height / originalHeight  * y1 + imageSize.y;
-    const x2_ = imageSize.width / originalWidth * x2 + imageSize.x;
-    const y2_ = imageSize.height / originalHeight  * y2 + imageSize.y;
+    const x1_ = resizeWidth / originalWidth * x1 + imageSize.x;
+    const y1_ = resizeHeight / originalHeight * y1 + imageSize.y;
+    const x2_ = resizeWidth / originalWidth * x2 + imageSize.x;
+    const y2_ = resizeHeight / originalHeight * y2 + imageSize.y;
     return [x1_, y1_, x2_, y2_];
   }
 
@@ -93,8 +79,8 @@ const Coordinates = () => {
   };
 
   const cropImage = async (coordinates: number[]) => {
-    const left = coordinates[0]
-    const top =  coordinates[1]
+    const left = coordinates[0]; 
+    const top =  coordinates[1];
     setPosition({left, top});
 
     const x1 = coordinates[0] * (originalWidth / resizeWidth);
@@ -106,12 +92,13 @@ const Coordinates = () => {
       offset: { x: x1, y: y1 },
       size: {
         width: (x2 - x1),
-        height: (y2 - y1),
+        height: (y2 - y1)
       },
         displaySize: {
-          width: coordinates[2] - coordinates[0],
-          height: coordinates[3] - coordinates[1],
+          width: coordinates[2] - coordinates[0], 
+          height: coordinates[3] - coordinates[1]
         },
+        quality: 1,
       });
   };
 
@@ -121,6 +108,7 @@ const Coordinates = () => {
         offset: { x: 0, y: 0 },
         size: { width: 0, height: 0 },
         displaySize: { width: 0, height: 0 },
+        quality: 1,
       });
 
       setKeyword("Box를 클릭해주세요!")
@@ -153,10 +141,20 @@ const Coordinates = () => {
   const renderBoundingBoxes = () => {
     return Object.keys(dict).map((key: string, index: number) => {
         const coordinates: ReturnType<typeof calculateCoordinates> = calculateCoordinates(dict[key as keyof typeof dict]['coord']);
+        // const coordinates = coord[0];
         return (
             <TouchableOpacity 
                 key={index}
-                style={{position: 'absolute',left: coordinates[0], top: coordinates[1], width: coordinates[2] - coordinates[0], height: coordinates[3] - coordinates[1], borderWidth: 3, borderColor: getRandomColor(),  opacity: focusBox ? 0.2 : 1.0 }}
+                style={{
+                  position: 'absolute',
+                  left: coordinates[0], 
+                  top: coordinates[1], 
+                  width: coordinates[2] - coordinates[0], 
+                  height: coordinates[3] - coordinates[1], 
+                  borderWidth: 3, 
+                  borderColor: getRandomColor(), 
+                  opacity: focusBox ? 0.2 : 1.0
+                }}
                 onPress={()=> handleClickBounding(key, coordinates)}>
                 <View key={index}/>
             </TouchableOpacity>
@@ -169,7 +167,11 @@ const Coordinates = () => {
         <GestureHandlerRootView>
           <View 
             style={{width: '100%', height: screenHeight-55, display: 'flex', alignItems: 'center', marginTop: 20, marginBottom: 100,}}>
-              { cropPath && <Image source={{uri: cropPath}} style={{position: 'absolute', zIndex: 1, width: cropData.displaySize.width, height: cropData.displaySize.height,  left: position.left, top: position.top }} />}
+              { cropPath && 
+                <Image 
+                  source={{uri: cropPath}} 
+                  style={{position: 'absolute', zIndex: 1, width: cropData.displaySize.width, height: cropData.displaySize.height,  left: position.left, top: position.top }} />
+              }
               <TouchableOpacity onPress={()=>setFocusBox(false)} activeOpacity={1}>
                 <Image source={{uri: uri}} style={{  width: resizeWidth, height: resizeHeight, opacity: focusBox ? 0.2 : 1.0 }} onLayout={handleImageLayout}/>
               </TouchableOpacity>
@@ -178,6 +180,21 @@ const Coordinates = () => {
               
               <ScrollView style={{width: resizeWidth }}>
                   <Text style={{"fontSize":16 }}>{context}</Text>
+                  { cropData && (
+                    <>
+                    <Text>{resizeWidth}</Text>
+                    <Text>{resizeHeight} </Text>
+                    <Text>{imageSize.width}</Text>
+                    <Text>{imageSize.height}</Text>
+                  
+                    <Text>{cropData.offset.x}</Text>
+                    <Text>{cropData.offset.y}</Text>
+                    <Text>{cropData.size.width}</Text>
+                    <Text>{cropData.size.height}</Text>
+                    <Text>{cropData.displaySize.width}</Text>
+                    <Text>{cropData.displaySize.height}</Text>
+                    </>
+                  )}
               </ScrollView>
               
           </View>

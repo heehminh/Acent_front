@@ -5,7 +5,7 @@ import Description from '../../components/Main/Description/Description'
 
 const DescriptionScreen = () => {
   return (
-    <View style={{backgroundColor: 'white'}}>
+    <View style={{height: '100%', backgroundColor: 'white'}}>
         <Header nextPage='FocusPointingScreen'/>
         <Description />
     </View>

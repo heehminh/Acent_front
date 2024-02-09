@@ -22,8 +22,13 @@ type UploadImageProps = {
 }
 
 const UploadImage = ({selectedImageUri, setSelectedImageUri}: UploadImageProps) => {
-  const originalWidth = 517;
-  const originalHeight = 673;
+  // // TODO 포플러나무
+  // const originalWidth = 517;
+  // const originalHeight = 673;
+
+  // TODO 열기구
+  const originalWidth = 800;
+  const originalHeight = 603;
 
   const [image, setImage] = useRecoilState(imageState);
   const handleImageChange = () => {
