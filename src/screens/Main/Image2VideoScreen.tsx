@@ -1,5 +1,5 @@
-import { View, TouchableOpacity, Dimensions, Image } from 'react-native'
-import React, { useState } from 'react'
+import { View, TouchableOpacity, Dimensions, Image, Platform } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import Video from 'react-native-video';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { heightSelector, uriSelector, widthSelector } from '../../recoil/selector';
@@ -10,9 +10,34 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import { getStatusBarHeight } from 'rn-statusbar-height';
 import NextPage from '../../components/Common/NextPage';
 import VideoShare from '../../components/Main/Video/VideoShare';
+import { useQuery } from 'react-query';
+import { getContentVideo } from '../../api/contents';
+import AppText from '../../components/Common/Text/AppText';
+import RNFetchBlob from 'rn-fetch-blob';
+import { atob } from 'react-native-quick-base64';
 
 const Image2VideoScreen = () => {
-  const video = require('../../assets/video/18.mp4');
+  const {data, isLoading, isError} = useQuery('contentVideo', getContentVideo);
+  const [base64video, setBase64video] = useState('');
+  
+  useEffect(()=>{
+    if (data && data.data) {
+      setBase64video(data.data.video_content);
+      console.log(base64video)
+    }
+  }, [data, base64video]);
+
+  // FIXME-파일형식
+  useEffect(()=>{
+    // base64 -> RN 내부에 저장 
+    const saveVideo = async () => {
+      const path = Platform.OS === 'ios' ? `${RNFetchBlob.fs.dirs.DocumentDir}/temp.mp4` : 'temp.mp4';
+      await RNFetchBlob.fs.writeFile(path, base64video, 'base64');
+    }
+
+    saveVideo();
+  }, [base64video]);
+
   const [onPress, setOnPress] = useState(false);
 
   const uri = useRecoilValue(uriSelector);
@@ -24,23 +49,32 @@ const Image2VideoScreen = () => {
 
   const top = getStatusBarHeight();
 
+  if (isLoading  || !data ) {
+    return (
+      <Image source={require('../../assets/image/loading.png')} style={{ zIndex: 1, width: '100%', height: '100%'}} resizeMode='cover' />
+    )
+  }
+
+  if (isError) {
+    return <AppText>Error</AppText>
+  } 
+
   return (
     <View style={{backgroundColor: theme.backgroundWhite}}>
 
       <View style={{
           position: 'relative', width: '100%', height: '100%', backgroundColor: theme.backgroundWhite
         }}>
-        { onPress ? (
+        { (onPress&&base64video) ? (
           <>
             <TouchableOpacity 
                 style={{ zIndex:1, position: 'absolute', top: top+10, left :15, }} 
-                onPress={()=>setOnPress(false)}
-            >
+                onPress={()=>setOnPress(false)} >
               <AntDesign name="arrowleft" size={30} color={theme.cocoa} />
             </TouchableOpacity>
             <View style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
               <Video 
-              source={video}
+              source={{ uri: `${RNFetchBlob.fs.dirs.DocumentDir}/temp.mp4` }}
               style={{
                   width: screenWidth,
                   height: resizeHeight,
