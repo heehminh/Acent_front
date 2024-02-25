@@ -13,8 +13,6 @@ import VideoShare from '../../components/Main/Video/VideoShare';
 import { useQuery } from 'react-query';
 import { getContentVideo } from '../../api/contents';
 import AppText from '../../components/Common/Text/AppText';
-import RNFetchBlob from 'rn-fetch-blob';
-import { atob } from 'react-native-quick-base64';
 
 const Image2VideoScreen = () => {
   const {data, isLoading, isError} = useQuery('contentVideo', getContentVideo);
@@ -26,17 +24,6 @@ const Image2VideoScreen = () => {
       console.log(base64video)
     }
   }, [data, base64video]);
-
-  // FIXME-파일형식
-  useEffect(()=>{
-    // base64 -> RN 내부에 저장 
-    const saveVideo = async () => {
-      const path = Platform.OS === 'ios' ? `${RNFetchBlob.fs.dirs.DocumentDir}/temp.mp4` : 'temp.mp4';
-      await RNFetchBlob.fs.writeFile(path, base64video, 'base64');
-    }
-
-    saveVideo();
-  }, [base64video]);
 
   const [onPress, setOnPress] = useState(false);
 
@@ -74,7 +61,7 @@ const Image2VideoScreen = () => {
             </TouchableOpacity>
             <View style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
               <Video 
-              source={{ uri: `${RNFetchBlob.fs.dirs.DocumentDir}/temp.mp4` }}
+              source={{ uri: `data:video/mpeg;base64,${base64video}` }}
               style={{
                   width: screenWidth,
                   height: resizeHeight,
